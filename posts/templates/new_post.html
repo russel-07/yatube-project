@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{% if edit %}Редактирование записи{% else %}Добавление записи{% endif %}{% endblock %}
+{% block content %}
+{% load post_filters %}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 p-5">
+        <div class="card">
+            <div class="card-header">{% if edit %}Изменение записи{% else %}Создание новой записи{% endif %}</div>
+            <div class="card-body">
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div class="form-group row">
+                            <label for="{{ field.id_for_label }}" class="col-md-4 col-form-label text-md-right">{{ field.label }}</label>
+                            <div class="col-md-6">
+                                {{ field|addclass:"form-control" }}
+                            </div>                
+                        </div>
+                    {% endfor %}
+
+                    <div class="col-md-6 offset-md-4">              
+                        <button type="submit" class="btn btn-primary">
+                            {% if edit %}Изменить{% else %}Добавить{% endif %}
+                        </button>
+                    </div>
+                </form>
+
+            </div> <!-- card body -->
+        </div> <!-- card -->
+    </div> <!-- col -->
+</div> <!-- row -->
+
+{% endblock %}
+
+
+
