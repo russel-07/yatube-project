@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Post, Group
+from .models import Post, Group, Comment, Follow
 
 class PostAdmin(admin.ModelAdmin):
     # перечисляем поля, которые должны отображаться в админке
@@ -19,6 +19,21 @@ class GroupAdmin(admin.ModelAdmin):
     empty_value_display = "-пусто-"
 
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('text', 'created', 'author', 'post')
+    search_fields = ('text',)
+    list_filter = ('created',)
+    empty_value_display = '-пусто-'
+
+
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ('user', 'author')
+    list_filter = ('user',)
+    empty_value_display = '-пусто-'
+
+
 # при регистрации модели Post источником конфигурации для неё назначаем класс PostAdmin
 admin.site.register(Post, PostAdmin)
 admin.site.register(Group, GroupAdmin)
+admin.site.register(Comment, CommentAdmin)
+admin.site.register(Follow, FollowAdmin)
