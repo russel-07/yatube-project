@@ -13,7 +13,7 @@ from .forms import PostForm, CommentForm
 User = get_user_model()
 
 
-@cache_page(20, key_prefix='index_page')
+#@cache_page(20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.all()
     paginator = Paginator(post_list, 10) # показывать по 10 записей на странице
