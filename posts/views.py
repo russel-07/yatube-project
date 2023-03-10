@@ -119,9 +119,8 @@ def add_comment(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    following = User.objects.get(id=request.user.id).follower.all().values_list('author')
-    post_list = Post.objects.filter(author__in = following)
-
+    following = Follow.objects.filter(user=request.user)
+    post_list = Post.objects.filter(author__following__in = following)
     paginator = Paginator(post_list, 10) # показывать по 10 записей на странице
     page_number = request.GET.get('page') # переменная в URL с номером запрошенной страницы
     page = paginator.get_page(page_number)  # получить записи с нужным смещением
