@@ -4,11 +4,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from datetime import date
 
 from .models import Post, Group, Comment, Follow
 from .forms import PostForm, CommentForm
+from .serializers import PostSerializer
 
 User = get_user_model()
 
@@ -20,26 +24,6 @@ def index(request):
     page_number = request.GET.get('page') # переменная в URL с номером запрошенной страницы
     page = paginator.get_page(page_number)  # получить записи с нужным смещением
     return render(request, 'index.html', {'page': page, 'paginator': paginator})
-
-
-def index2(request):
-    keyword = "утро"
-    author=User.objects.get(username="leo")
-    start_date=date(1854, 7, 7)
-    end_date=date(1854, 7, 21)
-    posts = Post.objects.filter(text__contains=keyword, author=author, pub_date__range=(start_date, end_date))
-    return render(request, "index.html", {"posts": posts})
-
-
-def index3(request):
-    keyword = request.GET.get("q", None)
-
-    if keyword:
-        posts = Post.objects.select_related("author", "group").filter(text__contains=keyword)
-    else:
-        posts = None
-
-    return render(request, "index.html", {"posts": posts, "keyword": keyword})
 
 
 def group_posts(request, slug):
@@ -134,7 +118,6 @@ def profile_follow(request, username):
 
     if not already_follower and author != request.user:
         Follow.objects.create(user=request.user, author=author)
-
     #return redirect(request.META.get('HTTP_REFERER'))
     return redirect(reverse('profile', kwargs={'username': username}))
 
@@ -144,7 +127,36 @@ def profile_unfollow(request, username):
     author = User.objects.get(username=username)
     follow = Follow.objects.filter(user=request.user, author=author)
     follow.delete()
-
     #return redirect(request.META.get('HTTP_REFERER'))
     return redirect(reverse('profile', kwargs={'username': username}))
 
+
+@api_view(['GET', 'POST'])
+def api_posts(request):
+    if request.method == 'GET':
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Новая запись успешно создана!'})
+        return
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+def api_posts_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == 'GET':
+        serializer = PostSerializer(post)
+        return JsonResponse(serializer.data)
+    elif request.method == 'PUT' or request.method == 'PATCH':
+        serializer = PostSerializer(post, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': f'Запись {post_id} успешно изменена!'})
+        return
+    elif request.method == 'DELETE':
+        post.delete()
+        return Response({'message': f'Запись {post_id} успешно удалена!'})

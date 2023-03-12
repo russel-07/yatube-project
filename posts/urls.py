@@ -5,7 +5,9 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('new/', views.new_post, name='new_post'),
-    path('follow/', views.follow_index, name='follow_index'),   
+    path('follow/', views.follow_index, name='follow_index'),
+    path('api/v1/posts/', views.api_posts, name='api_posts'),
+    path('api/v1/posts/<int:post_id>/', views.api_posts_detail, name='api_posts_detail'), 
     path('<str:username>/', views.profile, name='profile'), # Профайл пользователя
     path('<str:username>/<int:post_id>/', views.post_view, name='post'), # Просмотр записи
     path('<str:username>/<int:post_id>/edit/', views.post_edit, name='post_edit'),
