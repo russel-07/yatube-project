@@ -4,13 +4,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
-from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-
-from datetime import date
+from rest_framework import views, viewsets, status
+from rest_framework.permissions import BasePermission
 
 from .models import Post, Group, Comment, Follow
 from .forms import PostForm, CommentForm
@@ -47,7 +44,6 @@ def new_post(request):
         post.save()
         return redirect('/')
     return render(request, 'new_post.html', {'form': form})
-
 
 
 def profile(request, username):
@@ -140,9 +136,9 @@ def api_posts(request):
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        serializer = PostSerializer(data={'author': request.user.id, 'text': request.data['text']})
+        serializer = PostSerializer(data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -163,25 +159,25 @@ def api_posts_detail(request, post_id):
     elif request.method == 'DELETE':
         if request.user == post.author:
             post.delete()
-            return Response({'message': f'Запись {post_id} успешно удалена!'}, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_403_FORBIDDEN)
+   
 
-
-class APIPost(APIView):
+class APIPost(views.APIView):
     def get(self, request):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = PostSerializer(data={'author': request.user.id, 'text': request.data['text']})
+        serializer = PostSerializer(data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class APIPostDetail(APIView):
+class APIPostDetail(views.APIView):
     def get(self, request, post_id):
         post = get_object_or_404(Post, id=post_id)
         serializer = PostSerializer(post)
@@ -209,5 +205,24 @@ class APIPostDetail(APIView):
         post = get_object_or_404(Post, id=post_id)
         if post.author == request.user:
             post.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class OwnResourcePermission(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in ('GET', 'POST', 'PUT', 'PATCH', 'DELETE'):
+            return request.user == obj.author
+
+
+class APIPostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [OwnResourcePermission]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+
+
