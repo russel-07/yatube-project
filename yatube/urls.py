@@ -26,6 +26,9 @@ urlpatterns = [
     path('auth/', include('django.contrib.auth.urls')), # регистрация и авторизация
     path('', include('posts.urls')), # импорт из приложения posts
     path('', include('cd.urls')), # импорт из приложения cd
+    path('', include('api_v1.urls')),
+    path('', include('api_v2.urls')),
+    path('', include('api_v3.urls')),
 ]
 
 
