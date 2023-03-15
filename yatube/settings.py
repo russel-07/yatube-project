@@ -53,8 +53,10 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'debug_toolbar',
     'rest_framework',
+    'django_filters',
     'rest_framework.authtoken',
     'corsheaders',
+
 ]
 
 MIDDLEWARE = [
@@ -178,7 +180,27 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '100/minute', #  лимит для UserRateThrottle
+        'anon': '10/minute',  #  лимит для AnonRateThrottle
+    },
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        ],
+
+    'DEFAULT_PAGINATION_CLASS':
+        #'rest_framework.pagination.PageNumberPagination',
+        'api_v1.pagination.CustomPagination',
+
+    'PAGE_SIZE': 10,
 }
 
 
