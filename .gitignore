@@ -1,6 +1,16 @@
 .git/*
 env/
 venv/
+.vscode/
+api_v1/
+api_v2/
+api_v3/
+cd/
+practice/
+sent_emails/
+
+db.sqlite3
+db.sqlite3-journal
 
 __pycache__/
 *.py[cod]

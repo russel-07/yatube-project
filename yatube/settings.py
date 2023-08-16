@@ -40,7 +40,7 @@ INTERNAL_IPS = [
 
 INSTALLED_APPS = [
     'users',
-    'cd',
+    # 'cd',
     'posts',
     'django.contrib.sites',
     'django.contrib.flatpages',
