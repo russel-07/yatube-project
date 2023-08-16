@@ -20,12 +20,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls), # раздел администратора
-    path('about/', include('django.contrib.flatpages.urls')), # flatpages
-    path('auth/', include('users.urls')), # регистрация и авторизация
-    path('auth/', include('django.contrib.auth.urls')), # регистрация и авторизация
-    path('', include('posts.urls')), # импорт из приложения posts
-    # path('', include('cd.urls')), # импорт из приложения cd
+    path('admin/', admin.site.urls),
+    path('about/', include('django.contrib.flatpages.urls')),
+    path('auth/', include('users.urls')),
+    path('auth/', include('django.contrib.auth.urls')),
+    path('', include('posts.urls')),
+    # path('', include('cd.urls')),
     # path('', include('api_v1.urls')),
     # path('', include('api_v2.urls')),
     # path('', include('api_v3.urls')),
@@ -33,15 +33,20 @@ urlpatterns = [
 
 
 urlpatterns += [
-        path('about-author/', views.flatpage, {'url': '/author/'}, name='about'),
-        path('about-spec/', views.flatpage, {'url': '/spec/'}, name='terms'),
-        path('contacts/', views.flatpage, {'url': '/contacts/'}, name='contacts'),
+        path('about-author/', views.flatpage,
+             {'url': '/author/'}, name='about'),
+        path('about-spec/', views.flatpage,
+             {'url': '/spec/'}, name='terms'),
+        path('contacts/', views.flatpage,
+             {'url': '/contacts/'}, name='contacts'),
 ]
 
 
 if settings.DEBUG:
     import debug_toolbar
-    
+
     urlpatterns += (path("__debug__/", include(debug_toolbar.urls)),)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)

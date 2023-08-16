@@ -12,13 +12,14 @@ from .forms import PostForm, CommentForm
 User = get_user_model()
 
 
-#@cache_page(20, key_prefix='index_page')
+@cache_page(20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10) # показывать по 10 записей на странице
-    page_number = request.GET.get('page') # переменная в URL с номером запрошенной страницы
-    page = paginator.get_page(page_number)  # получить записи с нужным смещением
-    return render(request, 'index.html', {'page': page, 'paginator': paginator})
+    paginator = Paginator(post_list, 10)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    return render(request, 'index.html',
+                  {'page': page, 'paginator': paginator})
 
 
 def group_posts(request, slug):
@@ -28,7 +29,8 @@ def group_posts(request, slug):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 
-    return render(request, "group.html", {"group": group, 'page': page, 'paginator': paginator})
+    return render(request, "group.html",
+                  {"group": group, 'page': page, 'paginator': paginator})
 
 
 @login_required
@@ -49,36 +51,44 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     if request.user.is_authenticated:
-        following = Follow.objects.filter(user=request.user, author=author).count()
+        following = Follow.objects.filter(user=request.user,
+                                          author=author).count()
     else:
         following = False
-        
-    return render(request, 'profile.html', {'author': author, 'page': page, 'paginator': paginator, 'following': following})
- 
- 
+
+    return render(request, 'profile.html',
+                  {'author': author, 'page': page,
+                   'paginator': paginator, 'following': following})
+
+
 def post_view(request, username, post_id):
     author = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, id=post_id)
     comments = Comment.objects.filter(post=post)
     form = CommentForm()
     if request.user.is_authenticated:
-        following = Follow.objects.filter(user=request.user, author=author).count()
+        following = Follow.objects.filter(user=request.user,
+                                          author=author).count()
     else:
         following = False
-    return render(request, 'post.html', {'author': author, 'post': post, 'comments': comments, 'form': form, 'following': following})
+    return render(request, 'post.html',
+                  {'author': author, 'post': post, 'comments': comments,
+                   'form': form, 'following': following})
 
 
 @login_required
 def post_edit(request, username, post_id):
     user_profile = get_object_or_404(User, username=username)
     if user_profile.username != request.user.username:
-        return redirect(f'/{username}/{post_id}/')   
+        return redirect(f'/{username}/{post_id}/')
     post = get_object_or_404(Post, id=post_id)
-    form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
+    form = PostForm(request.POST or None, files=request.FILES or None,
+                    instance=post)
     if form.is_valid():
         form.save()
         return redirect(f'/{username}/{post_id}/')
-    return render(request, 'new_post.html', {'form': form, 'post': post, 'edit': True})
+    return render(request, 'new_post.html',
+                  {'form': form, 'post': post, 'edit': True})
 
 
 @login_required
@@ -91,28 +101,31 @@ def add_comment(request, username, post_id):
         comment.author = request.user
         comment.post = post
         comment.save()
-        return redirect(reverse('post', kwargs={'username': post.author, 'post_id': post.id}))
+        return redirect(reverse('post', kwargs={'username': post.author,
+                                                'post_id': post.id}))
     return render(request, 'comments.html', {'form': form})
 
 
 @login_required
 def follow_index(request):
     following = Follow.objects.filter(user=request.user)
-    post_list = Post.objects.filter(author__following__in = following)
-    paginator = Paginator(post_list, 10) # показывать по 10 записей на странице
-    page_number = request.GET.get('page') # переменная в URL с номером запрошенной страницы
-    page = paginator.get_page(page_number)  # получить записи с нужным смещением
-    return render(request, 'follow.html', {'page': page, 'paginator': paginator})
+    post_list = Post.objects.filter(author__following__in=following)
+    paginator = Paginator(post_list, 10)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    return render(request, 'follow.html',
+                  {'page': page, 'paginator': paginator})
 
 
 @login_required
 def profile_follow(request, username):
     author = User.objects.get(username=username)
-    already_follower = Follow.objects.filter(user=request.user, author=author).count()
+    already_follower = Follow.objects.filter(user=request.user,
+                                             author=author).count()
 
     if not already_follower and author != request.user:
         Follow.objects.create(user=request.user, author=author)
-    #return redirect(request.META.get('HTTP_REFERER'))
+    # return redirect(request.META.get('HTTP_REFERER'))
     return redirect(reverse('profile', kwargs={'username': username}))
 
 
@@ -121,6 +134,5 @@ def profile_unfollow(request, username):
     author = User.objects.get(username=username)
     follow = Follow.objects.filter(user=request.user, author=author)
     follow.delete()
-    #return redirect(request.META.get('HTTP_REFERER'))
+    # return redirect(request.META.get('HTTP_REFERER'))
     return redirect(reverse('profile', kwargs={'username': username}))
-
