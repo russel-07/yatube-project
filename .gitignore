@@ -8,6 +8,7 @@ api_v3/
 cd/
 practice/
 sent_emails/
+media/cache/
 
 db.sqlite3
 db.sqlite3-journal
