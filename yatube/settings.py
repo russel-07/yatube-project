@@ -172,7 +172,7 @@ CACHES = {
 
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
-
+'''
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated', 
@@ -202,7 +202,7 @@ REST_FRAMEWORK = {
 
     'PAGE_SIZE': 10,
 }
-
+'''
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
